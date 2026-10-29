@@ -34,7 +34,7 @@ with sqlite3.connect(db_path.as_uri() + '?mode=ro', uri=True) as db:
         if db.execute('SELECT count(*) FROM task_relations WHERE task_id=? AND other_task_id=? AND relation_kind=?',
                       (a,b,kind)).fetchone()[0] != 1:
             errors.append(['relation',relation])
-    counts = dict(db.execute('SELECT id, count(*) FROM tasks GROUP BY id').fetchall())
+    counts = dict(db.execute('SELECT id, count(*) FROM tasks WHERE deleted_at IS NULL GROUP BY id').fetchall())
     if any(counts.get(tid) != 1 for tid in state['tasks'].values()): errors.append(['task count'])
     integrity = db.execute('PRAGMA integrity_check').fetchone()[0]
     if integrity != 'ok': errors.append(['integrity',integrity])
