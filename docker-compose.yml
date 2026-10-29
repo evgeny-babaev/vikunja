@@ -1,0 +1,52 @@
+services:
+  vikunja:
+    image: vikunja/vikunja:2.7.1@sha256:f7dc8428d10aef17f3075886d3c1c022f566ec456f88985f02c137f4fc534576
+    restart: unless-stopped
+    env_file: /opt/configs/vikunja/production.env
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: https://tasks.45.38.3.79.sslip.io/
+      VIKUNJA_SERVICE_ROOTPATH: /data
+      VIKUNJA_SERVICE_TIMEZONE: Europe/Moscow
+      VIKUNJA_SERVICE_ENABLEREGISTRATION: "false"
+      VIKUNJA_SERVICE_ENABLELINKSHARING: "false"
+      VIKUNJA_SERVICE_ENABLECALDAV: "false"
+      VIKUNJA_SERVICE_ENABLEEMAILREMINDERS: "false"
+      VIKUNJA_DATABASE_TYPE: sqlite
+      VIKUNJA_DATABASE_PATH: /data/vikunja.db
+      VIKUNJA_FILES_BASEPATH: /data/files
+      VIKUNJA_BACKGROUNDS_PROVIDERS_UNSPLASH_ENABLED: "false"
+      VIKUNJA_MAILER_ENABLED: "false"
+      VIKUNJA_METRICS_ENABLED: "false"
+      VIKUNJA_LOG_LEVEL: warning
+    user: "1000:1000"
+    volumes:
+      - /opt/data/vikunja:/data
+    networks: [coolify]
+    mem_limit: 384m
+    cpus: 1.0
+    pids_limit: 128
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+    healthcheck:
+      test: [CMD, /app/vikunja/vikunja, healthcheck]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: coolify
+      traefik.http.services.vikunja-global.loadbalancer.server.port: "3456"
+      traefik.http.routers.vikunja-global-http.rule: Host(`tasks.45.38.3.79.sslip.io`)
+      traefik.http.routers.vikunja-global-http.entrypoints: http
+      traefik.http.routers.vikunja-global-http.middlewares: vikunja-global-redirect
+      traefik.http.middlewares.vikunja-global-redirect.redirectscheme.scheme: https
+networks:
+  coolify:
+    external: true

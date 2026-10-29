@@ -1,0 +1,8 @@
+http:
+  routers:
+    vikunja-global-https:
+      entryPoints: [https]
+      rule: "Host(`tasks.45.38.3.79.sslip.io`)"
+      service: vikunja-global@docker
+      tls:
+        certResolver: letsencrypt

@@ -55,3 +55,9 @@ PLAN.md
 plans/
 /.crush/
 /.playwright-mcp
+
+# Local deployment secrets
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
